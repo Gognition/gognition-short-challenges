@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 	"sort"
 	"strings"
 	"testing"
@@ -21,10 +22,11 @@ var (
 
 func TestUpdateInventory(t *testing.T) {
 	testCases := []struct {
-		name           string
-		inventory      map[string]Product
-		sales          map[string]int
-		expectedAlerts []string
+		name              string
+		inventory         map[string]Product
+		sales             map[string]int
+		expectedAlerts    []string
+		expectedInventory map[string]Product
 	}{
 		{
 			name: "Case 1: Multiple alerts",
@@ -43,6 +45,11 @@ func TestUpdateInventory(t *testing.T) {
 				"Alerta: Stock bajo para Mouse. Quedan 4 unidades.",
 				"Alerta: Stock bajo para Keyboard. Quedan 3 unidades.",
 			},
+			expectedInventory: map[string]Product{
+				"Laptop":   {Stock: 5, AlertThreshold: 10},
+				"Mouse":    {Stock: 4, AlertThreshold: 5},
+				"Keyboard": {Stock: 3, AlertThreshold: 5},
+			},
 		},
 		{
 			name: "Case 2: Single alert",
@@ -56,6 +63,10 @@ func TestUpdateInventory(t *testing.T) {
 			},
 			expectedAlerts: []string{
 				"Alerta: Stock bajo para Tablet. Quedan 5 unidades.",
+			},
+			expectedInventory: map[string]Product{
+				"Tablet":    {Stock: 5, AlertThreshold: 5},
+				"Headphone": {Stock: 20, AlertThreshold: 10},
 			},
 		},
 		{
@@ -71,6 +82,10 @@ func TestUpdateInventory(t *testing.T) {
 			expectedAlerts: []string{
 				"Alerta: Stock bajo para Smartwatch. Quedan 2 unidades.",
 			},
+			expectedInventory: map[string]Product{
+				"Smartwatch": {Stock: 2, AlertThreshold: 3},
+				"Charger":    {Stock: 50, AlertThreshold: 20},
+			},
 		},
 		{
 			name: "Case 4: Error for overselling",
@@ -82,6 +97,9 @@ func TestUpdateInventory(t *testing.T) {
 			},
 			expectedAlerts: []string{
 				"Error: Venta de 6 unidades de Monitor excede el stock disponible de 5.",
+			},
+			expectedInventory: map[string]Product{
+				"Monitor": {Stock: 5, AlertThreshold: 2},
 			},
 		},
 		{
@@ -98,6 +116,10 @@ func TestUpdateInventory(t *testing.T) {
 				"Alerta: Stock bajo para Printer. Quedan 5 unidades.",
 				"Alerta: Stock bajo para Scanner. Quedan 1 unidades.",
 			},
+			expectedInventory: map[string]Product{
+				"Printer": {Stock: 5, AlertThreshold: 5},
+				"Scanner": {Stock: 1, AlertThreshold: 2},
+			},
 		},
 	}
 
@@ -106,14 +128,26 @@ func TestUpdateInventory(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			resultAlerts := UpdateInventory(tc.inventory, tc.sales)
+			inventoryCopy := make(map[string]Product)
+			for k, v := range tc.inventory {
+				inventoryCopy[k] = v
+			}
+
+			resultAlerts := UpdateInventory(inventoryCopy, tc.sales)
+
 			if !equalUnordered(resultAlerts, tc.expectedAlerts) {
-				fmt.Printf("%sX Test fallido (%s): Se esperaba %v, pero se obtuvo %v. Revisa tu código por favor.%s\n",
+				fmt.Printf("%sX Test fallido (%s): Alertas incorrectas.\nSe esperaba: %v\nPero se obtuvo: %v%s\n",
 					red, tc.name, tc.expectedAlerts, resultAlerts, reset)
 				t.Fail()
 			} else {
-				fmt.Printf("%s✔ Test logrado satisfactoriamente (%s)%s\n", green, tc.name, reset)
-				passedTests++
+				if !reflect.DeepEqual(inventoryCopy, tc.expectedInventory) {
+					fmt.Printf("%sX Test fallido (%s): Inventario incorrecto.\nSe esperaba: %v\nPero se obtuvo: %v%s\n",
+						red, tc.name, tc.expectedInventory, inventoryCopy, reset)
+					t.Fail()
+				} else {
+					fmt.Printf("%s✔ Test logrado satisfactoriamente (%s)%s\n", green, tc.name, reset)
+					passedTests++
+				}
 			}
 		})
 	}
