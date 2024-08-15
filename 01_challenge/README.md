@@ -61,6 +61,6 @@ Nota: En main.go encontrarás la estructura que deberán tener las alertas gener
 
 ## 📺 Respuestas y Explicaciones
 
-La respuesta completa y una explicación detallada están disponibles en mi canal de YouTube. ¡No olvides suscribirte para no perderte ningún detalle! [YouTube: Harley Zapata](https://www.youtube.com/@harleyzapata) 🎉
+La respuesta completa y una [explicación detallada](https://youtu.be/Qeym4sQpIYk) están disponibles en mi canal de YouTube. ¡No olvides suscribirte para no perderte ningún detalle! [YouTube: Harley Zapata](https://www.youtube.com/@harleyzapata) 🎉
 
 ---
